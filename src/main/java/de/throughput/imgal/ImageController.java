@@ -39,7 +39,7 @@ public class ImageController {
     public String displayImage(@PathVariable String id, Model model) {
         // Validate that 'id' contains only digits
         if (!id.matches("\\d+")) {
-            model.addAttribute("errorMessage", "non-numeric id: '%s'".formatted(id));
+            model.addAttribute("errorMessage", "Non-numeric id: '%s'".formatted(id));
             return "error";
         }
 
@@ -48,7 +48,7 @@ public class ImageController {
         File imagePath = new File(imageDirectory, imageFileName);
 
         if (!imagePath.canRead()) {
-            model.addAttribute("errorMessage", "can't read image path: '%s'".formatted(imagePath.getAbsolutePath()));
+            model.addAttribute("errorMessage", "Can't read image path: '%s'".formatted(imagePath.getAbsolutePath()));
             return "error";
         }
 
@@ -69,6 +69,12 @@ public class ImageController {
             if (index < idList.size() - 1) {
                 nextId = idList.get(index + 1);
             }
+
+            // Calculate the page number for the current image
+            int imagesPerPage = 25;
+            int currentPage = index / imagesPerPage; // Zero-based page index
+
+            model.addAttribute("currentPage", currentPage);
         }
 
         model.addAttribute("imagePath", String.format("/image/%s", imageFileName));
@@ -80,6 +86,7 @@ public class ImageController {
         }
         return "image";
     }
+
 
 
     @GetMapping("/t/{id}.jpg")
