@@ -1,6 +1,8 @@
-# Image Gallery Application
+# Image Gallery
 
-A Java Spring Boot web application that displays images from a specified directory in a paginated gallery. It dynamically generates and caches thumbnails, allowing users to view full-sized images with navigation controls.
+A Java Spring Boot web application that displays images from a specified directory in a paginated gallery. 
+It dynamically generates and caches thumbnails, allowing users to view full-sized images with navigation 
+controls.
 
 ## Acknowledgements
 
