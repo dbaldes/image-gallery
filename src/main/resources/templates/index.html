@@ -3,6 +3,7 @@
 <head>
     <title>Image Gallery</title>
     <style>
+        /* Existing styles remain unchanged */
         body {
             font-family: Arial, sans-serif;
             margin: 0;
@@ -29,68 +30,44 @@
             color: inherit;
         }
         /* Styles for navigation arrows */
-        .nav-link {
-            font-size: 2em;
+        .nav-link, .page-link {
+            font-size: 1.2em;
             color: black;
             text-decoration: none;
-            padding: 10px;
-            background-color: rgba(255, 255, 255, 0.5);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 10px;
+            padding: 5px 10px;
+            margin: 0 5px;
         }
-        .nav-link:hover {
+        .nav-link:hover, .page-link:hover {
             color: gray;
-            background-color: rgba(255, 255, 255, 0.8);
         }
-        .nav-link.inactive {
+        .nav-link.inactive, .page-link.inactive {
             color: lightgray;
-            background-color: rgba(255, 255, 255, 0.8);
             cursor: default;
             pointer-events: none;
         }
-        .nav-link.inactive:hover {
-            color: lightgray;
-            background-color: rgba(255, 255, 255, 0.8);
-        }
-        .navigation-container {
+        .pagination-container {
             display: flex;
             justify-content: center;
             align-items: center;
+            flex-wrap: wrap;
             margin-top: 20px;
         }
         .page-info {
-            margin: 0 20px;
-            font-size: 1.2em;
+            margin: 0 10px;
+            font-size: 1em;
         }
+        .page-link.current-page {
+            font-weight: bold;
+            text-decoration: underline;
+            cursor: default;
+            pointer-events: none;
+        }
+
     </style>
 </head>
 <body>
 <div class="gallery-container">
-    <h1>DrMockIt's Image Gallery</h1>
-
-    <!-- Navigation Arrows at the top -->
-    <div class="navigation-container">
-        <!-- Left Navigation Arrow -->
-        <a class="nav-link"
-           th:href="${previousPage != null} ? @{/(page=${previousPage})} : null"
-           th:classappend="${previousPage == null} ? ' inactive'">
-            &#9664;
-        </a>
-
-        <div class="page-info">
-            Page <span th:text="${currentPage}"></span> of <span th:text="${totalPages}"></span>
-        </div>
-
-        <!-- Right Navigation Arrow -->
-        <a class="nav-link"
-           th:href="${nextPage != null} ? @{/(page=${nextPage})} : null"
-           th:classappend="${nextPage == null} ? ' inactive'">
-            &#9654;
-        </a>
-    </div>
+    <h1>Image Gallery</h1>
 
     <!-- Gallery Table -->
     <table class="gallery-table">
@@ -98,31 +75,46 @@
         <tr th:each="row : ${rows}">
             <td th:each="id : ${row}">
                 <a th:href="@{/i/{id}(id=${id})}">
-                    <img th:src="@{/t/{id}.jpg(id=${id})}" alt="Image Thumbnail" width="170" height="128" />
+                    <img th:src="@{/t/{id}.jpg(id=${id})}" alt="Image Thumbnail"/>
                 </a>
             </td>
         </tr>
         </tbody>
     </table>
 
-    <!-- Navigation Arrows at the bottom -->
-    <div class="navigation-container">
-        <!-- Left Navigation Arrow -->
+    <!-- Pagination Links -->
+    <div class="pagination-container">
+        <!-- First Page Link -->
+        <a class="nav-link" th:href="@{/(page=0)}" th:classappend="${currentPage == 0} ? ' inactive'">
+            &#171; First
+        </a>
+
+        <!-- Previous Page Link -->
         <a class="nav-link"
            th:href="${previousPage != null} ? @{/(page=${previousPage})} : null"
            th:classappend="${previousPage == null} ? ' inactive'">
-            &#9664;
+            &#8249; Prev
         </a>
 
-        <div class="page-info">
-            Page <span th:text="${currentPage}"></span> of <span th:text="${totalPages}"></span>
-        </div>
+        <!-- Page Number Links -->
+        <span th:each="pageNum : ${pageNumbers}">
+            <a class="page-link"
+               th:href="@{/(page=${pageNum})}"
+               th:classappend="${pageNum == currentPage} ? ' current-page'">
+                <span th:text="${pageNum + 1}"></span>
+            </a>
+        </span>
 
-        <!-- Right Navigation Arrow -->
+        <!-- Next Page Link -->
         <a class="nav-link"
            th:href="${nextPage != null} ? @{/(page=${nextPage})} : null"
            th:classappend="${nextPage == null} ? ' inactive'">
-            &#9654;
+            Next &#8250;
+        </a>
+
+        <!-- Last Page Link -->
+        <a class="nav-link" th:href="@{/(page=${totalPages - 1})}" th:classappend="${currentPage == totalPages -1} ? ' inactive'">
+            Last &#187;
         </a>
     </div>
 

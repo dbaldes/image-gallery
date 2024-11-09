@@ -171,11 +171,27 @@ public class ImageController {
         Integer previousPage = (page > 0) ? page - 1 : null;
         Integer nextPage = (page < totalPages - 1) ? page + 1 : null;
 
+        // Calculate page numbers to display in pagination
+        int paginationDisplaySize = 5; // Number of page links to display
+        int startPage = Math.max(0, page - paginationDisplaySize / 2);
+        int endPage = Math.min(totalPages - 1, startPage + paginationDisplaySize - 1);
+
+        // Adjust startPage if we are near the end
+        if (endPage - startPage < paginationDisplaySize - 1) {
+            startPage = Math.max(0, endPage - paginationDisplaySize + 1);
+        }
+
+        List<Integer> pageNumbers = new ArrayList<>();
+        for (int i = startPage; i <= endPage; i++) {
+            pageNumbers.add(i);
+        }
+
         model.addAttribute("rows", rows);
         model.addAttribute("previousPage", previousPage);
         model.addAttribute("nextPage", nextPage);
-        model.addAttribute("currentPage", page + 1); // For display purposes
+        model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", totalPages);
+        model.addAttribute("pageNumbers", pageNumbers);
 
         return "index";
     }
