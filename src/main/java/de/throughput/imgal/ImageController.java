@@ -1,19 +1,22 @@
 // src/main/java/de/throughput/imgal/ImageController.java
 package de.throughput.imgal;
 
-import jakarta.websocket.server.PathParam;
 import org.apache.commons.imaging.bytesource.ByteSource;
-import org.apache.commons.imaging.Imaging;
 import org.apache.commons.imaging.formats.jpeg.JpegImageParser;
 import org.apache.xmpbox.xml.DomXmpParser;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -27,6 +30,7 @@ public class ImageController {
     public String displayImage(@PathVariable String id, Model model) {
         // Validate that 'id' contains only digits
         if (!id.matches("\\d+")) {
+            model.addAttribute("errorMessage", "non-numeric id: '%s'".formatted(id));
             return "error";
         }
 
@@ -35,16 +39,17 @@ public class ImageController {
         File imagePath = new File(imageDirectory, imageFileName);
 
         if (!imagePath.canRead()) {
+            model.addAttribute("errorMessage", "can't read image path: '%s'".formatted(imagePath.getAbsolutePath()));
             return "error";
         }
 
         getImageDescription(imagePath, imageFileName, model);
 
         // Get the list of IDs and determine previous and next IDs
-        List<Integer> idList = getSortedIdList();
-        int currentId = Integer.parseInt(id);
-        Integer previousId = null;
-        Integer nextId = null;
+        List<Long> idList = getSortedIdList();
+        long currentId = Long.parseLong(id);
+        Long previousId = null;
+        Long nextId = null;
 
         // Find the index of the current ID
         int index = idList.indexOf(currentId);
@@ -85,13 +90,13 @@ public class ImageController {
         }
     }
 
-    private List<Integer> getSortedIdList() {
+    private List<Long> getSortedIdList() {
         File[] files = imageDirectory.listFiles();
         if (files == null) {
             return Collections.emptyList();
         }
 
-        List<Integer> idList = new ArrayList<>();
+        List<Long> idList = new ArrayList<>();
         Pattern pattern = Pattern.compile("i(\\d+)\\.jpg");
 
         for (File file : files) {
@@ -99,7 +104,7 @@ public class ImageController {
             Matcher matcher = pattern.matcher(name);
             if (matcher.matches()) {
                 String idStr = matcher.group(1);
-                int fileId = Integer.parseInt(idStr);
+                long fileId = Long.parseLong(idStr);
                 idList.add(fileId);
             }
         }

@@ -9,8 +9,8 @@
     <artifactId>imgal</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>imgal</name>
-    <description>A simplistic Spring Boot web application.</description>
-    <packaging>jar</packaging>
+    <description>Image gallery for DrMockIt's images.</description>
+    <packaging>war</packaging>
 
     <parent>
         <groupId>org.springframework.boot</groupId>
@@ -29,6 +29,11 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-tomcat</artifactId>
+            <scope>provided</scope>
         </dependency>
 
         <!-- Thymeleaf Template Engine -->
