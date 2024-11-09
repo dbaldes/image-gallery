@@ -1,6 +1,7 @@
 // src/main/java/de/throughput/imgal/ImageController.java
 package de.throughput.imgal;
 
+import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.imaging.bytesource.ByteSource;
 import org.apache.commons.imaging.formats.jpeg.JpegImageParser;
 import org.apache.xmpbox.xml.DomXmpParser;
@@ -9,6 +10,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -19,12 +21,19 @@ import java.util.Collections;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
+import javax.imageio.ImageIO;
 
 @Controller
 public class ImageController {
 
+    public static final int TUMBNAIL_HEIGHT = 128;
+
     @Value("${image.path}")
     private File imageDirectory;
+    @Value("${thumbnail.path}")
+    private File thumbnailDirectory;
 
     @GetMapping("/i/{id}")
     public String displayImage(@PathVariable String id, Model model) {
@@ -70,6 +79,105 @@ public class ImageController {
             model.addAttribute("nextId", nextId.toString());
         }
         return "image";
+    }
+
+
+    @GetMapping("/t/{id}.jpg")
+    public void renderThumbnail(@PathVariable String id, HttpServletResponse response) {
+        // Validate that 'id' contains only digits
+        if (!id.matches("\\d+")) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            return;
+        }
+
+        String thumbnailFileName = String.format("i%s.jpg", id);
+        File thumbnailFile = new File(thumbnailDirectory, thumbnailFileName);
+
+        try {
+            // If the thumbnail already exists, serve it
+            if (thumbnailFile.exists() && thumbnailFile.canRead()) {
+                response.setContentType("image/jpeg");
+                try (InputStream is = new FileInputStream(thumbnailFile)) {
+                    is.transferTo(response.getOutputStream());
+                }
+                return;
+            }
+
+            // Load the original image
+            String imageFileName = String.format("i%s.jpg", id);
+            File imageFile = new File(imageDirectory, imageFileName);
+            if (!imageFile.exists() || !imageFile.canRead()) {
+                response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                return;
+            }
+
+            BufferedImage originalImage = ImageIO.read(imageFile);
+            if (originalImage == null) {
+                response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                return;
+            }
+
+            // Calculate the thumbnail dimensions to keep the aspect ratio
+            int originalWidth = originalImage.getWidth();
+            int originalHeight = originalImage.getHeight();
+            int newHeight = TUMBNAIL_HEIGHT;
+            int newWidth = (originalWidth * newHeight) / originalHeight;
+
+            // Create and scale the thumbnail image
+            BufferedImage thumbnailImage = new BufferedImage(newWidth, newHeight, BufferedImage.TYPE_INT_RGB);
+            Graphics2D graphics = thumbnailImage.createGraphics();
+            graphics.drawImage(originalImage, 0, 0, newWidth, newHeight, null);
+            graphics.dispose();
+
+            // Save the thumbnail
+            ImageIO.write(thumbnailImage, "jpg", thumbnailFile);
+
+            // Serve the thumbnail
+            response.setContentType("image/jpeg");
+            try (InputStream is = new FileInputStream(thumbnailFile)) {
+                is.transferTo(response.getOutputStream());
+            }
+
+        } catch (Exception e) {
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @GetMapping("/")
+    public String showIndex(@RequestParam(value = "page", defaultValue = "0") int page, Model model) {
+        List<Long> idList = getSortedIdList();
+
+        int imagesPerPage = 25;
+        int totalPages = (int) Math.ceil((double) idList.size() / imagesPerPage);
+
+        // Ensure the page number is within bounds
+        if (page < 0) {
+            page = 0;
+        } else if (page >= totalPages) {
+            page = totalPages - 1;
+        }
+
+        int startIndex = page * imagesPerPage;
+        int endIndex = Math.min(startIndex + imagesPerPage, idList.size());
+        List<Long> pageIdList = idList.subList(startIndex, endIndex);
+
+        // Divide pageIdList into rows of 5 elements
+        List<List<Long>> rows = new ArrayList<>();
+        for (int i = 0; i < pageIdList.size(); i += 5) {
+            rows.add(pageIdList.subList(i, Math.min(i + 5, pageIdList.size())));
+        }
+
+        // Determine if previous or next pages are available
+        Integer previousPage = (page > 0) ? page - 1 : null;
+        Integer nextPage = (page < totalPages - 1) ? page + 1 : null;
+
+        model.addAttribute("rows", rows);
+        model.addAttribute("previousPage", previousPage);
+        model.addAttribute("nextPage", nextPage);
+        model.addAttribute("currentPage", page + 1); // For display purposes
+        model.addAttribute("totalPages", totalPages);
+
+        return "index";
     }
 
     private static void getImageDescription(File imagePath, String imageFileName, Model model) {

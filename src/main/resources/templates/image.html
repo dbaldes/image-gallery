@@ -61,6 +61,18 @@
             color: lightgray;
             background-color: rgba(255, 255, 255, 0.8);
         }
+        /* New styles for the gallery link */
+        .gallery-link {
+            margin-top: 20px;
+            font-size: 1.2em;
+        }
+        .gallery-link a {
+            text-decoration: none;
+            color: black;
+        }
+        .gallery-link a:hover {
+            color: gray;
+        }
     </style>
 </head>
 <body>
@@ -81,6 +93,13 @@
            th:href="${nextId != null} ? @{/i/{id}(id=${nextId})} : null"
            th:classappend="${nextId == null} ? ' inactive'">
             &#9654;
+        </a>
+    </div>
+
+    <!-- Link to the Gallery -->
+    <div class="gallery-link">
+        <a th:href="@{/}">
+            &#8679; Back to Gallery
         </a>
     </div>
 

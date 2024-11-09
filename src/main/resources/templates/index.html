@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Image Gallery</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+        }
+        .gallery-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .gallery-table {
+            border-collapse: collapse;
+        }
+        .gallery-table td {
+            padding: 10px;
+            text-align: center;
+        }
+        .gallery-table img {
+            width: auto;
+            height: 96px; /* Match the thumbnail height */
+            border: 1px solid #ccc;
+        }
+        .gallery-table a {
+            text-decoration: none;
+            color: inherit;
+        }
+        /* Styles for navigation arrows */
+        .nav-link {
+            font-size: 2em;
+            color: black;
+            text-decoration: none;
+            padding: 10px;
+            background-color: rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 10px;
+        }
+        .nav-link:hover {
+            color: gray;
+            background-color: rgba(255, 255, 255, 0.8);
+        }
+        .nav-link.inactive {
+            color: lightgray;
+            background-color: rgba(255, 255, 255, 0.8);
+            cursor: default;
+            pointer-events: none;
+        }
+        .nav-link.inactive:hover {
+            color: lightgray;
+            background-color: rgba(255, 255, 255, 0.8);
+        }
+        .navigation-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 20px;
+        }
+        .page-info {
+            margin: 0 20px;
+            font-size: 1.2em;
+        }
+    </style>
+</head>
+<body>
+<div class="gallery-container">
+    <h1>DrMockIt's Image Gallery</h1>
+
+    <!-- Navigation Arrows at the top -->
+    <div class="navigation-container">
+        <!-- Left Navigation Arrow -->
+        <a class="nav-link"
+           th:href="${previousPage != null} ? @{/(page=${previousPage})} : null"
+           th:classappend="${previousPage == null} ? ' inactive'">
+            &#9664;
+        </a>
+
+        <div class="page-info">
+            Page <span th:text="${currentPage}"></span> of <span th:text="${totalPages}"></span>
+        </div>
+
+        <!-- Right Navigation Arrow -->
+        <a class="nav-link"
+           th:href="${nextPage != null} ? @{/(page=${nextPage})} : null"
+           th:classappend="${nextPage == null} ? ' inactive'">
+            &#9654;
+        </a>
+    </div>
+
+    <!-- Gallery Table -->
+    <table class="gallery-table">
+        <tbody>
+        <tr th:each="row : ${rows}">
+            <td th:each="id : ${row}">
+                <a th:href="@{/i/{id}(id=${id})}">
+                    <img th:src="@{/t/{id}.jpg(id=${id})}" alt="Image Thumbnail" width="170" height="128" />
+                </a>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+    <!-- Navigation Arrows at the bottom -->
+    <div class="navigation-container">
+        <!-- Left Navigation Arrow -->
+        <a class="nav-link"
+           th:href="${previousPage != null} ? @{/(page=${previousPage})} : null"
+           th:classappend="${previousPage == null} ? ' inactive'">
+            &#9664;
+        </a>
+
+        <div class="page-info">
+            Page <span th:text="${currentPage}"></span> of <span th:text="${totalPages}"></span>
+        </div>
+
+        <!-- Right Navigation Arrow -->
+        <a class="nav-link"
+           th:href="${nextPage != null} ? @{/(page=${nextPage})} : null"
+           th:classappend="${nextPage == null} ? ' inactive'">
+            &#9654;
+        </a>
+    </div>
+
+</div>
+</body>
+</html>
