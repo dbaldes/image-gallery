@@ -212,6 +212,7 @@ public class ImageController {
                 var metadata = new DomXmpParser().parse(xmpXml.getBytes(StandardCharsets.UTF_8));
                 var dc = metadata.getDublinCoreSchema();
                 if (dc != null) {
+                    model.addAttribute("imageTitle", dc.getTitle());
                     model.addAttribute("imagePrompt", dc.getDescription());
                     model.addAttribute("originalPrompt", dc.getSource());
                 }

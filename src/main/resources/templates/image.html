@@ -1,8 +1,7 @@
-<!-- src/main/resources/templates/image.html -->
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Image Viewer</title>
+    <title th:text="${imageTitle}">Image Viewer</title>
     <style>
         /* Existing styles remain unchanged */
         body {
@@ -62,7 +61,6 @@
             color: lightgray;
             background-color: rgba(255, 255, 255, 0.8);
         }
-        /* Styles for the gallery link */
         .gallery-link {
             margin-top: 20px;
             font-size: 1.2em;
@@ -74,10 +72,19 @@
         .gallery-link a:hover {
             color: gray;
         }
+        /* Title above image */
+        .image-title {
+            font-size: 1.5em;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
     </style>
 </head>
 <body>
 <div class="centered-content">
+    <!-- Image Title -->
+    <div class="image-title" th:text="${imageTitle}"></div>
+
     <div class="image-container">
         <!-- Left Navigation Arrow -->
         <a class="nav-link"
